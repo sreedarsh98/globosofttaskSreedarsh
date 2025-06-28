@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner, Pagination, Form } from 'react-bootstrap';
-import JobCard from '../components/JobCard';
-import SearchBar from '../components/SearchBar';
+import JobCard from '../Components/JobCard';
+import SearchBar from '../Components/SearchBar';
+
 
 const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
+  console.log(jobs,"jobs");
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('date');
   const jobsPerPage = 6;
@@ -62,7 +65,7 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
           <Row xs={1} md={2} lg={3} className="g-4 mb-4">
             {paginatedJobs.map(job => (
               <Col key={job.id}>
-                <JobCard 
+                <JobCard
                   job={job} 
                   onFavoriteToggle={toggleFavorite}
                   onViewDetails={handleViewDetails}
