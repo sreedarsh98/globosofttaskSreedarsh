@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Spinner, Pagination, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import JobCard from '../Components/JobCard';
 import SearchBar from '../Components/SearchBar';
-import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 
 const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('date');
+  const navigate = useNavigate();
   const jobsPerPage = 6;
-  const navigate = useNavigate(); // ✅ Initialize navigate
+
+  const parseSalary = (salaryStr) => {
+    if (!salaryStr) return 0;
+    return parseInt(salaryStr.replace(/[^\d]/g, ''), 10) || 0;
+  };
 
   const sortedJobs = [...jobs].sort((a, b) => {
     if (sortBy === 'date') {
-      return new Date(b.postedDate) - new Date(a.postedDate);
+      return new Date(b.postedDate) - new Date(a.postedDate); // Newest first
     } else {
-      const salaryA = a.salary ? parseInt(a.salary.replace(/[^0-9]/g, '')) : 0;
-      const salaryB = b.salary ? parseInt(b.salary.replace(/[^0-9]/g, '')) : 0;
-      return salaryB - salaryA;
+      return parseSalary(b.salary) - parseSalary(a.salary); // Highest salary first
     }
   });
 
@@ -26,7 +29,7 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
   );
 
   const handleViewDetails = (id) => {
-    navigate(`/job/${id}`); // ✅ Navigate to the job detail page
+    navigate(`/job/${id}`);
   };
 
   return (
@@ -47,7 +50,7 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
       </div>
 
       {loading && (
-        <div className="loading-spinner">
+        <div className="loading-spinner text-center my-5">
           <Spinner animation="border" variant="primary" />
         </div>
       )}
@@ -66,7 +69,7 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
                 <JobCard
                   job={job}
                   onFavoriteToggle={toggleFavorite}
-                  onViewDetails={handleViewDetails} // ✅ Passed down
+                  onViewDetails={handleViewDetails}
                 />
               </Col>
             ))}
