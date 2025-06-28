@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Spinner, Pagination, Form } from 'react-bootstrap';
 import JobCard from '../Components/JobCard';
 import SearchBar from '../Components/SearchBar';
-
+import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 
 const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
-  console.log(jobs,"jobs");
-  
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('date');
   const jobsPerPage = 6;
+  const navigate = useNavigate(); // ✅ Initialize navigate
 
   const sortedJobs = [...jobs].sort((a, b) => {
     if (sortBy === 'date') {
@@ -27,14 +26,13 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
   );
 
   const handleViewDetails = (id) => {
-    // In a real app, you would navigate to the details page
-    console.log(`View details for job ${id}`);
+    navigate(`/job/${id}`); // ✅ Navigate to the job detail page
   };
 
   return (
     <Container className="my-5">
       <SearchBar onSearch={onSearch} />
-      
+
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Available Jobs</h2>
         <Form.Group className="mb-3" style={{ width: '200px' }}>
@@ -47,33 +45,33 @@ const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
           </Form.Select>
         </Form.Group>
       </div>
-      
+
       {loading && (
         <div className="loading-spinner">
           <Spinner animation="border" variant="primary" />
         </div>
       )}
-      
+
       {error && (
         <div className="alert alert-danger">
           {error}
         </div>
       )}
-      
+
       {!loading && !error && (
         <>
           <Row xs={1} md={2} lg={3} className="g-4 mb-4">
             {paginatedJobs.map(job => (
               <Col key={job.id}>
                 <JobCard
-                  job={job} 
+                  job={job}
                   onFavoriteToggle={toggleFavorite}
-                  onViewDetails={handleViewDetails}
+                  onViewDetails={handleViewDetails} // ✅ Passed down
                 />
               </Col>
             ))}
           </Row>
-          
+
           {jobs.length > jobsPerPage && (
             <div className="d-flex justify-content-center">
               <Pagination>
