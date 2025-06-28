@@ -1,31 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Spinner, Pagination, Form } from 'react-bootstrap';
 import JobCard from '../components/JobCard';
 import SearchBar from '../components/SearchBar';
-import SkeletonLoader from '../components/SkeletonLoader';
-import { useJobs } from '../hooks/useJobs';
 
-const Home = () => {
-  const { jobs, loading, error, toggleFavorite } = useJobs();
-  const [filteredJobs, setFilteredJobs] = useState([]);
-  const [sortBy, setSortBy] = useState('date');
+const Home = ({ jobs, loading, error, onSearch, toggleFavorite }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('date');
   const jobsPerPage = 6;
 
-  const handleSearch = (title, location) => {
-    const filtered = jobs.filter(job => {
-      const titleMatch = job.title.toLowerCase().includes(title.toLowerCase());
-      const locationMatch = job.location.toLowerCase().includes(location.toLowerCase());
-      return titleMatch && locationMatch;
-    });
-    setFilteredJobs(filtered);
-    setCurrentPage(1); // Reset to first page on new search
-  };
-
-  useEffect(() => {
-    setFilteredJobs(jobs);
-  }, [jobs]);
-
-  const sortedJobs = [...filteredJobs].sort((a, b) => {
+  const sortedJobs = [...jobs].sort((a, b) => {
     if (sortBy === 'date') {
       return new Date(b.postedDate) - new Date(a.postedDate);
     } else {
@@ -40,64 +23,80 @@ const Home = () => {
     currentPage * jobsPerPage
   );
 
+  const handleViewDetails = (id) => {
+    // In a real app, you would navigate to the details page
+    console.log(`View details for job ${id}`);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Job Listings</h1>
-        <select 
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="p-2 border rounded"
-        >
-          <option value="date">Sort by Date</option>
-          <option value="salary">Sort by Salary</option>
-        </select>
+    <Container className="my-5">
+      <SearchBar onSearch={onSearch} />
+      
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Available Jobs</h2>
+        <Form.Group className="mb-3" style={{ width: '200px' }}>
+          <Form.Select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="date">Sort by Date</option>
+            <option value="salary">Sort by Salary</option>
+          </Form.Select>
+        </Form.Group>
       </div>
       
-      <SearchBar onSearch={handleSearch} />
-      
-      {loading && <SkeletonLoader count={5} />}
-      
-      {error && <div className="error-message text-red-500">{error}</div>}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedJobs.map(job => (
-          <JobCard 
-            key={job.id} 
-            job={job} 
-            onFavoriteToggle={toggleFavorite} 
-          />
-        ))}
-      </div>
-      
-      {filteredJobs.length > jobsPerPage && (
-        <div className="flex justify-center mt-8">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 mx-1 border rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          {Array.from({ length: Math.ceil(sortedJobs.length / jobsPerPage) }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 mx-1 border rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : ''}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(sortedJobs.length / jobsPerPage)))}
-            disabled={currentPage === Math.ceil(sortedJobs.length / jobsPerPage)}
-            className="px-4 py-2 mx-1 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
+      {loading && (
+        <div className="loading-spinner">
+          <Spinner animation="border" variant="primary" />
         </div>
       )}
-    </div>
+      
+      {error && (
+        <div className="alert alert-danger">
+          {error}
+        </div>
+      )}
+      
+      {!loading && !error && (
+        <>
+          <Row xs={1} md={2} lg={3} className="g-4 mb-4">
+            {paginatedJobs.map(job => (
+              <Col key={job.id}>
+                <JobCard 
+                  job={job} 
+                  onFavoriteToggle={toggleFavorite}
+                  onViewDetails={handleViewDetails}
+                />
+              </Col>
+            ))}
+          </Row>
+          
+          {jobs.length > jobsPerPage && (
+            <div className="d-flex justify-content-center">
+              <Pagination>
+                <Pagination.Prev 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                />
+                {Array.from({ length: Math.ceil(jobs.length / jobsPerPage) }).map((_, i) => (
+                  <Pagination.Item
+                    key={i}
+                    active={i + 1 === currentPage}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </Pagination.Item>
+                ))}
+                <Pagination.Next 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(jobs.length / jobsPerPage)))}
+                  disabled={currentPage === Math.ceil(jobs.length / jobsPerPage)}
+                />
+              </Pagination>
+            </div>
+          )}
+        </>
+      )}
+    </Container>
   );
 };
 

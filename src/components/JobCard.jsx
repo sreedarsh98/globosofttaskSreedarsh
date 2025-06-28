@@ -1,24 +1,55 @@
 import React from 'react';
+import { Card, Button, Badge } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
+import { faMapMarkerAlt, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
-const JobCard = ({ job, onFavoriteToggle }) => {
+const JobCard = ({ job, onFavoriteToggle, onViewDetails }) => {
   return (
-    <div className="job-card border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-      <h3 className="text-lg font-semibold">{job.title}</h3>
-      <p className="text-gray-600">{job.company}</p>
-      <p className="text-gray-500">{job.location}</p>
-      {job.salary && <p className="text-green-600">{job.salary}</p>}
-      <div className="flex justify-between mt-4">
-        <button className="view-details-btn bg-blue-500 text-white px-4 py-2 rounded">
-          View Details
-        </button>
-        <button 
-          onClick={() => onFavoriteToggle(job.id)}
-          className={`favorite-btn text-2xl ${job.isFavorite ? 'text-red-500' : 'text-gray-400'}`}
-        >
-          {job.isFavorite ? '❤️' : '♡'}
-        </button>
-      </div>
-    </div>
+    <Card className="job-card mb-4 h-100">
+      <Card.Body>
+        <div className="d-flex justify-content-between">
+          <div>
+            <Card.Title>{job.title}</Card.Title>
+            <Card.Subtitle className="mb-2 text-primary">{job.company}</Card.Subtitle>
+          </div>
+          <button 
+            onClick={() => onFavoriteToggle(job.id)}
+            className="favorite-btn"
+          >
+            <FontAwesomeIcon 
+              icon={job.isFavorite ? solidHeart : regularHeart} 
+              color={job.isFavorite ? "#dc3545" : "#6c757d"} 
+            />
+          </button>
+        </div>
+        
+        <div className="mb-2">
+          <FontAwesomeIcon icon={faMapMarkerAlt} className="me-2 text-muted" />
+          <span className="text-muted">{job.location}</span>
+        </div>
+        
+        {job.salary && (
+          <Badge bg="light" text="primary" className="salary-badge mb-3">
+            {job.salary}
+          </Badge>
+        )}
+        
+        <div className="d-flex justify-content-between align-items-center">
+          <Button 
+            variant="primary" 
+            onClick={() => onViewDetails(job.id)}
+          >
+            View Details
+          </Button>
+          <small className="text-muted">
+            <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+            {new Date(job.postedDate).toLocaleDateString()}
+          </small>
+        </div>
+      </Card.Body>
+    </Card>
   );
 };
 

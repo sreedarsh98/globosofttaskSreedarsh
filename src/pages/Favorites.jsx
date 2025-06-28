@@ -1,29 +1,51 @@
 import React from 'react';
-import { useJobs } from '../hooks/useJobs';
-import JobCard from '../components/JobCard';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeartBroken } from '@fortawesome/free-solid-svg-icons';
+import JobCard from '../Components/JobCard';
 
-const Favorites = () => {
-  const { jobs, toggleFavorite } = useJobs();
+
+const Favorites = ({ jobs, toggleFavorite, onViewDetails }) => {
   const favoriteJobs = jobs.filter(job => job.isFavorite);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Your Favorite Jobs</h1>
+    <Container className="my-5">
+      <Card className="mb-4">
+        <Card.Body>
+          <h1>Your Favorite Jobs</h1>
+          <p className="text-muted">
+            {favoriteJobs.length} {favoriteJobs.length === 1 ? 'job' : 'jobs'} saved
+          </p>
+        </Card.Body>
+      </Card>
       
       {favoriteJobs.length === 0 ? (
-        <p>You haven't favorited any jobs yet.</p>
+        <Card className="empty-state">
+          <Card.Body>
+            <div className="empty-state-icon">
+              <FontAwesomeIcon icon={faHeartBroken} size="3x" />
+            </div>
+            <h3>No favorites yet</h3>
+            <p className="text-muted mb-4">Save jobs you're interested in by clicking the heart icon.</p>
+            <Button variant="primary" href="/">
+              Browse Jobs
+            </Button>
+          </Card.Body>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Row xs={1} md={2} lg={3} className="g-4">
           {favoriteJobs.map(job => (
-            <JobCard 
-              key={job.id} 
-              job={job} 
-              onFavoriteToggle={toggleFavorite} 
-            />
+            <Col key={job.id}>
+              <JobCard
+                job={job} 
+                onFavoriteToggle={toggleFavorite}
+                onViewDetails={onViewDetails}
+              />
+            </Col>
           ))}
-        </div>
+        </Row>
       )}
-    </div>
+    </Container>
   );
 };
 

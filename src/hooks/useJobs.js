@@ -1,37 +1,80 @@
-import { useEffect, useState } from 'react';
-import { useFavorites } from '../context/FavoritesContext';
+import { useState, useEffect } from 'react';
 
-export const useJobs = () => {
+const useJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { isFavorite } = useFavorites();
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        // Replace with actual API call
-        const response = await fetch('/jobs.json');
-        const data = await response.json();
-        setJobs(data.map(job => ({
-          ...job,
-          isFavorite: isFavorite(job.id)
-        })));
+        // In a real app, you would fetch from an API
+        // For demo purposes, we'll use a timeout to simulate loading
+        setTimeout(() => {
+          const storedFavorites = JSON.parse(localStorage.getItem('favoriteJobs') || '[]');
+          
+          const mockJobs = [
+            {
+              id: "1",
+              title: "Frontend Developer",
+              company: "Tech Corp",
+              location: "New York, NY",
+              salary: "$90,000 - $120,000",
+              description: "We are looking for a skilled Frontend Developer to join our team. Responsibilities include developing user interfaces, implementing responsive designs, and collaborating with the backend team.\n\nRequirements:\n- 3+ years of React experience\n- Strong JavaScript skills\n- Familiarity with modern frontend tools",
+              postedDate: "2023-05-15",
+              isFavorite: storedFavorites.includes("1")
+            },
+            {
+              id: "2",
+              title: "Backend Engineer",
+              company: "Data Systems",
+              location: "Remote",
+              salary: "$110,000 - $140,000",
+              description: "Join our backend team to build scalable APIs and services. You'll work with Node.js, Python, and various databases to create robust backend systems.\n\nRequirements:\n- Experience with RESTful APIs\n- Knowledge of database design\n- Understanding of cloud services",
+              postedDate: "2023-05-20",
+              isFavorite: storedFavorites.includes("2")
+            },
+            {
+              id: "3",
+              title: "UX Designer",
+              company: "Creative Minds",
+              location: "San Francisco, CA",
+              salary: "$85,000 - $105,000",
+              description: "We need a creative UX Designer to help us build intuitive user experiences. You'll create wireframes, prototypes, and conduct user research.\n\nRequirements:\n- Portfolio demonstrating UX skills\n- Experience with Figma or Sketch\n- Understanding of user-centered design",
+              postedDate: "2023-05-10",
+              isFavorite: storedFavorites.includes("3")
+            }
+          ];
+          
+          setJobs(mockJobs);
+          setLoading(false);
+        }, 800);
       } catch (err) {
         setError('Failed to fetch jobs');
-      } finally {
         setLoading(false);
       }
     };
 
     fetchJobs();
-  }, [isFavorite]);
+  }, []);
 
   const toggleFavorite = (id) => {
-    setJobs(prev => prev.map(job => 
-      job.id === id ? { ...job, isFavorite: !job.isFavorite } : job
-    ));
+    setJobs(prevJobs => {
+      const updatedJobs = prevJobs.map(job => 
+        job.id === id ? { ...job, isFavorite: !job.isFavorite } : job
+      );
+      
+      // Update localStorage
+      const favoriteIds = updatedJobs
+        .filter(job => job.isFavorite)
+        .map(job => job.id);
+      localStorage.setItem('favoriteJobs', JSON.stringify(favoriteIds));
+      
+      return updatedJobs;
+    });
   };
 
   return { jobs, loading, error, toggleFavorite };
 };
+
+export default useJobs;
